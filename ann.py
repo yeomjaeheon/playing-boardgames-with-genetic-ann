@@ -1,7 +1,14 @@
+from audioop import cross
 import numpy as np
 
 def crossover(a, b):
-    pass
+    child = ann(a.structure)
+    for i in range(0, len(a.structure) - 1):
+        if np.random.randint(2) == 0:
+            child.weights[i] = a.weights[i].copy()
+        else:
+            child.weights[i] = b.weights[i].copy()
+    return child
 
 class ann:
     def sigmoid(x):
@@ -21,7 +28,9 @@ class ann:
         input_data += bias
         for w in self.weights[:-1]:
             input_data = ann.sigmoid(np.dot(input_data, w))
-        return ann.softmax_simp(np.dot(input_data, self.weights[-1]))
+        return np.dot(input_data, self.weights[-1])
 
-    def mut(self):
-        pass
+    def mut(self, mut_rate = 0.03, mut_scale = 0.01):
+        for i in range(0, len(self.weights)):
+            if np.random.random() <= mut_rate:
+                self.weights[i] += np.random.normal(loc = 0.0, scale = mut_scale, size = (self.structure[i], self.structure[i + 1]))

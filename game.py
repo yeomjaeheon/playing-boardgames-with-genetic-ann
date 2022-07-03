@@ -1,4 +1,6 @@
-class hexapawn: #흑색 진영이 먼저 시작
+import copy
+
+class hexapawn: #흑색 진영이 먼저 시작, 상태 평가는 흑색 진영 기준으로 진행
     def __init__(self, width, height):
         self.width, self.height = width, height
         self.game_counter = 0
@@ -10,15 +12,18 @@ class hexapawn: #흑색 진영이 먼저 시작
             self.board[i] = self.value['black']
             self.board[width * height - (1 + i)] = self.value['white']
 
-    def play(self, pos, move): #주어진 수가 가능한 수인지 반환, 이동 : 0 -> 앞으로 전진, 1 -> 좌측 폰 잡기, 2 -> 우측 폰 잡기
+    def play(self, pos, move, count): #주어진 수가 가능한 수인지 반환, 이동 : 0 -> 앞으로 전진, 1 -> 좌측 폰 잡기, 2 -> 우측 폰 잡기
         x, y = pos % self.width, pos // self.width
         player = ['black', 'white'][self.game_counter % 2]
-        print(player)
         enemy = ['black', 'white'][(self.game_counter + 1) % 2]
         player_value = self.value[player]
         enemy_value = self.value[enemy]
         move_direction = player_value
         left, right = player_value, -player_value #진영 색에 맞추어서 좌, 우 방향을 정함, 하나의 신경망으로 분석할 수 있도록 서로 회전대칭 관계임
+        if count:
+            self.game_counter += 1
+        else:
+            self.board_backup = copy.deepcopy(self.board)
         if self.board[pos] == player_value:
             if move == 0:
                 if self.board[pos + move_direction * self.width] == self.value['empty']:
@@ -40,10 +45,12 @@ class hexapawn: #흑색 진영이 먼저 시작
                         self.board[pos + move_direction * self.width + right] = player_value
                 else:
                     return False
-            self.game_counter += 1
-            return True
+            self.board_simulate = copy.deepcopy(self.board)
+            if not count:
+                self.board = copy.deepcopy(self.board_backup)
+            return self.board_simulate
         else:
-            return 'a'
+            return False
 
     def win(self):
         for i in range(0, self.width):
@@ -58,3 +65,6 @@ class hexapawn: #흑색 진영이 먼저 시작
             for j in range(0, self.width):
                 print({1 : 'B', -1 : 'W', 0 : '.'}[self.board[i * self.width + j]], end = '')
             print('')
+
+    def reset(self):
+        self.__init__(self.width, self.height)
