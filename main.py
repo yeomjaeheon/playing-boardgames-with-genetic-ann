@@ -1,8 +1,3 @@
-import game
+import game, ann
 
-b = game.hexapawn(4, 4)
-while True:
-    code = input()
-    exec(code)
-    b.display()
-    print(b.win())
+#각 신경망이 받아들이는 보드의 값은 자신의 말이 1, 상대의 말이 -1임 -> 백색 진영의 경우에는 -1로 반전해 줄 것

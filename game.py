@@ -1,4 +1,4 @@
-class hexapawn: #검은색 진영이 먼저 시작
+class hexapawn: #흑색 진영이 먼저 시작
     def __init__(self, width, height):
         self.width, self.height = width, height
         self.game_counter = 0
