@@ -62,9 +62,9 @@ class searching_space:
                 index = i
         return self.anns[index]
 
-generation = 5
+generation = 20
 population = 300
-width, height = 4, 4
+width, height = 5, 5
 agent = searching_space(population, [width * height, 30, 30, 1])
 
 for i in range(0, generation):
