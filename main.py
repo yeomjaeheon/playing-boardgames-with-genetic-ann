@@ -62,9 +62,9 @@ class searching_space:
                 index = i
         return self.anns[index]
 
-generation = 3
+generation = 30
 population = 300
-width, height = 4, 4
+width, height = 5, 5
 agent = searching_space(population, [width * height, 30, 30, 1])
 
 for i in range(0, generation):
@@ -73,7 +73,7 @@ for i in range(0, generation):
         for k in range(j + 1, population):
             winner = play_game(agent.get(j), agent.get(k), width, height)
             agent.reward([j, k][winner])
-    with open('{0}by{1}hexa gen{2}'.format(width, height, i + 1), 'wb') as f:
+    with open('{0}by{1}hexa  gen{2}'.format(width, height, i + 1), 'wb') as f:
         dill.dump(agent, f)
     print('{0}세대 : 저장 완료, {1}분({2}초) 경과'.format(i + 1, (time.time() - t) / 60, time.time() - t))
     agent.update()
