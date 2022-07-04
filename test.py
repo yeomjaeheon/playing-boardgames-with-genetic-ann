@@ -12,7 +12,7 @@ color = input()
 with open(file_name, 'rb') as f:
     agent = dill.load(f)
 
-player = agent.get_best_player()
+player = agent.get(random.randint(0, agent.num_ann - 1))#agent.get_best_player()
 
 board = game.hexapawn(width, height)
 
