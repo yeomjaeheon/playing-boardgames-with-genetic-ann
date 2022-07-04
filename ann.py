@@ -29,7 +29,7 @@ class ann:
             input_data = ann.sigmoid(np.dot(input_data, w))
         return np.dot(input_data, self.weights[-1])
 
-    def mut(self, mut_rate = 0.03, mut_scale = 0.01):
+    def mut(self, mut_rate = 0.01, mut_scale = 0.01):
         for i in range(0, len(self.weights)):
             if np.random.random() <= mut_rate:
                 self.weights[i] += np.random.normal(loc = 0.0, scale = mut_scale, size = (self.structure[i], self.structure[i + 1]))

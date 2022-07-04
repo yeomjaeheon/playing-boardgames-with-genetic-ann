@@ -3,12 +3,15 @@ import game, dill, random
 print('file name : ', end = '')
 file_name = input()
 
+print('width, height : ', end = '')
+width, height = map(int, input().split())
+
 with open(file_name, 'rb') as f:
     agent = dill.load(f)
 
 player = agent.get_best_player()
 
-board = game.hexapawn(4, 4)
+board = game.hexapawn(width, height)
 
 while True:
     print('move : ', end = '')
