@@ -71,9 +71,9 @@ savings.append(copy.deepcopy(agent))
 time_takes = 0
 
 try:
-    with open('intermediate_storage', 'rb') as f:
+    with open('ints', 'rb') as f:
         intermediate_storage = dill.load(f)
-    if intermediate_storage.agents.structure == agent.structure and len(intermediate_storage) < generation:
+    if intermediate_storage[-1].structure == agent.structure and len(intermediate_storage) < generation:
         print('이전 진행 과정을 이어서 진행(Y/N)', end = '')
         if input() == 'Y':
             mode = 'prev'
@@ -87,28 +87,34 @@ if mode == 'new':
     for i in range(0, generation):
         t = time.time()
         for j in range(0, population):
-            print('{0}세대 : {1}/{2} 완료'.format(i + 1, j + 1, population))
+            if (j + 1) % 10 == 0:
+                print('{0}세대 : {1}/{2} 완료'.format(i + 1, j + 1, population))
             for k in range(j + 1, population):
                 winner = play_game(agent.get(j), agent.get(k), width, height)
                 agent.reward([j, k][winner])
         agent.update()
         savings.append(copy.deepcopy(agent))
-        with open('intermediate_storage', 'wb') as f:
+        with open('ints', 'wb') as f:
             dill.dump(savings, f)
         time_takes += (time.time() - t)
         print('{0}세대 : 저장 완료, {1}분 경과, {2}분 남음(예상)'.format(i + 1, (time.time() - t) / 60, (time_takes / (i + 1)) * (generation - (i + 1)) / 60))
+    with open('gen{0}_{1}_{2}'.format(generation, width, height), 'wb') as f:
+        dill.dump(savings, f)
 
 elif mode == 'prev':
-    for i in range(len(intermediate_storage), generation):
+    for i in range(len(intermediate_storage) - 1, generation):
         t = time.time()
         for j in range(0, population):
-            print('{0}세대 : {1}/{2} 완료'.format(i + 1, j + 1, population))
+            if (j + 1) % 10 == 0:
+                print('{0}세대 : {1}/{2} 완료'.format(i + 1, j + 1, population))
             for k in range(j + 1, population):
                 winner = play_game(agent.get(j), agent.get(k), width, height)
                 agent.reward([j, k][winner])
         agent.update()
         intermediate_storage.append(copy.deepcopy(agent))
-        with open('intermediate_storage', 'wb') as f:
+        with open('ints', 'wb') as f:
             dill.dump(intermediate_storage, f)
         time_takes += (time.time() - t)
         print('{0}세대 : 저장 완료, {1}분 경과, {2}분 남음(예상)'.format(i + 1, (time.time() - t) / 60, (time_takes / (i + 1)) * (generation - (i + 1)) / 60))
+    with open('gen{0}_{1}_{2}'.format(generation, width, height), 'wb') as f:
+        dill.dump(intermediate_storage, f)
