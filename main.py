@@ -1,5 +1,7 @@
 import game, ann, random, dill, time, copy
 
+#각 신경망이 다른 모든 신경망과 두 가지 진영 이상으로 경기를 하도록 수정할 것, n**2으로
+
 #각 신경망이 받아들이는 보드의 값은 동일함, 보드 상태 평가는 흑색 진영을 기준으로 진행됨, 평가된 상태는 백색 진영의 경우 -1을 곱해 반전시킬 것
 #speciation이 필요한지 고려해 볼 것
 
@@ -74,11 +76,14 @@ try:
     with open('ints', 'rb') as f:
         intermediate_storage = dill.load(f)
     if intermediate_storage[-1].structure == agent.structure and len(intermediate_storage) < generation:
+        '''
         print('이전 진행 과정을 이어서 진행(Y/N)', end = '')
         if input() == 'Y':
             mode = 'prev'
         else:
             mode = 'new'
+        '''
+        mode = 'prev'
     
 except:
     mode = 'new'
@@ -89,7 +94,7 @@ if mode == 'new':
         for j in range(0, population):
             if (j + 1) % 10 == 0:
                 print('{0}세대 : {1}/{2} 완료'.format(i + 1, j + 1, population))
-            for k in range(j + 1, population):
+            for k in range(0, population):
                 winner = play_game(agent.get(j), agent.get(k), width, height)
                 agent.reward([j, k][winner])
         agent.update()
@@ -107,7 +112,7 @@ elif mode == 'prev':
         for j in range(0, population):
             if (j + 1) % 10 == 0:
                 print('{0}세대 : {1}/{2} 완료'.format(i + 1, j + 1, population))
-            for k in range(j + 1, population):
+            for k in range(0, population):
                 winner = play_game(agent.get(j), agent.get(k), width, height)
                 agent.reward([j, k][winner])
         agent.update()
