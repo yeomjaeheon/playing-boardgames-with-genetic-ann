@@ -1,4 +1,4 @@
-import game, ann, random, dill, time
+import game, ann, random, dill, time, copy
 
 #각 신경망이 받아들이는 보드의 값은 동일함, 보드 상태 평가는 흑색 진영을 기준으로 진행됨, 평가된 상태는 백색 진영의 경우 -1을 곱해 반전시킬 것
 #speciation이 필요한지 고려해 볼 것
@@ -62,18 +62,55 @@ class searching_space:
                 index = i
         return self.anns[index]
 
-generation = 30
+savings = []
+generation = 10
 population = 300
-width, height = 5, 5
+width, height = 4, 4
 agent = searching_space(population, [width * height, 30, 30, 1])
+time_takes = 0
 
-for i in range(0, generation):
-    t = time.time()
-    for j in range(0, population):
-        for k in range(j + 1, population):
-            winner = play_game(agent.get(j), agent.get(k), width, height)
-            agent.reward([j, k][winner])
-    with open('{0}by{1}hexa  gen{2}'.format(width, height, i + 1), 'wb') as f:
-        dill.dump(agent, f)
-    print('{0}세대 : 저장 완료, {1}분({2}초) 경과'.format(i + 1, (time.time() - t) / 60, time.time() - t))
-    agent.update()
+try:
+    with open('intermediate_storage', 'rb') as f:
+        intermediate_storage = dill.load(f)
+    if intermediate_storage.agents.structure[0] == width * height:
+        pass
+    print('이전 진행 과정을 이어서 진행(Y/N)', end = '')
+    if input() == 'Y':
+        mode = 'prev'
+    else:
+        mode = 'new'
+    
+except:
+    mode = 'new'
+
+if mode == 'new':
+    for i in range(0, generation):
+        t = time.time()
+        for j in range(0, population):
+            print('{0}세대 : {1}/{2} 완료'.format(i + 1, j + 1, population))
+            for k in range(j + 1, population):
+                winner = play_game(agent.get(j), agent.get(k), width, height)
+                agent.reward([j, k][winner])
+        with open('intermediate_storage', 'wb') as f:
+            dill.dump(savings, f)
+        time_takes += (time.time() - t)
+        print('{0}세대 : 저장 완료, {1}분 경과, {2}분 남음(예상)'.format(i + 1, (time.time() - t) / 60, (time_takes / (i + 1)) * (generation - (i + 1)) / 60))
+        savings.append(copy.deepcopy(agent))
+        agent.update()
+
+elif mode == 'prev':
+    for i in range(0, generation):
+        t = time.time()
+        for j in range(0, population):
+            print('{0}세대 : {1}/{2} 완료'.format(i + 1, j + 1, population))
+            for k in range(j + 1, population):
+                winner = play_game(agent.get(j), agent.get(k), width, height)
+                agent.reward([j, k][winner])
+        with open('intermediate_storage', 'wb') as f:
+            dill.dump(savings, f)
+        time_takes += (time.time() - t)
+        print('{0}세대 : 저장 완료, {1}분 경과, {2}분 남음(예상)'.format(i + 1, (time.time() - t) / 60, (time_takes / (i + 1)) * (generation - (i + 1)) / 60))
+        with open('intermediate_storage', 'wb') as f:
+            dill.dump(savings)
+        savings.append(copy.deepcopy(agent))
+        agent.update()
