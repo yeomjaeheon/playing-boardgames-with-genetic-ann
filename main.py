@@ -65,8 +65,8 @@ class searching_space:
         return self.anns[index]
 
 savings = []
-generation = 30
-population = 300
+generation = 60
+population = 100
 width, height = 4, 4
 agent = searching_space(population, [width * height, 30, 30, 1])
 savings.append(copy.deepcopy(agent))
