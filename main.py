@@ -65,10 +65,10 @@ class searching_space:
         return self.anns[index]
 
 savings = []
-generation = 60
-population = 100
-width, height = 4, 4
-agent = searching_space(population, [width * height, 30, 30, 1])
+generation = 50
+population = 200
+width, height = 5, 5
+agent = searching_space(population, [width * height, 10, 20, 10, 1])
 savings.append(copy.deepcopy(agent))
 time_takes = 0
 
@@ -84,6 +84,8 @@ try:
             mode = 'new'
         '''
         mode = 'prev'
+    else:
+        mode = 'new'
     
 except:
     mode = 'new'

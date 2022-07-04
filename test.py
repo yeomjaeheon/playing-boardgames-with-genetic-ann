@@ -12,7 +12,7 @@ color = input()
 with open(file_name, 'rb') as f:
     agents = dill.load(f)
 
-mode = 'best'
+mode = 'random'
 
 if mode == 'random':
     player = agents[-1].get(random.randint(0, agents[-1].num_ann - 1))
