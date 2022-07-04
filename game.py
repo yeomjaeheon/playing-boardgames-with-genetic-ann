@@ -6,15 +6,21 @@ class hexapawn: #흑색 진영이 먼저 시작, 상태 평가는 흑색 진영 
         self.game_counter = 0
         self.value = {'black' : 1, 'white' : -1, 'empty' : 0}
 
-        self.possible_moves = {'black' : [], 'white' : []}
-
         #보드 초기화
         self.board = [0 for i in range(0, width * height)]
         for i in range(0, width):
             self.board[i] = self.value['black']
             self.board[-(i + 1)] = self.value['white']
 
+        #초기 상태에서 가능한 수 조사
+        self.possible_moves = {'black' : self.search(), 'white' : []}
+
     def play(self, pos, move):
+        '''
+        for p in self.possible_moves[['black', 'white'][self.game_counter % 2]]:
+            if p['move'] == [pos, move]:
+                print('success')
+        '''
         self.simulate(pos, move, count = True)
         return self.win()
 
@@ -39,17 +45,15 @@ class hexapawn: #흑색 진영이 먼저 시작, 상태 평가는 흑색 진영 
                 else:
                     return False
             elif move == 1:
-                if 0 <= x + left < self.width and 0 <= y + move_direction < self.height:
-                    if self.board[pos + move_direction * self.width + left] == enemy_value:
-                        self.board[pos] = self.value['empty']
-                        self.board[pos + move_direction * self.width + left] = player_value
+                if 0 <= x + left < self.width and 0 <= y + move_direction < self.height and self.board[pos + move_direction * self.width + left] == enemy_value:
+                    self.board[pos] = self.value['empty']
+                    self.board[pos + move_direction * self.width + left] = player_value
                 else:
                     return False
             elif move == 2:
-                if 0 <= x + right < self.width and 0 <= y + move_direction < self.height:
-                    if self.board[pos + move_direction * self.width + right] == enemy_value:
-                        self.board[pos] = self.value['empty']
-                        self.board[pos + move_direction * self.width + right] = player_value
+                if 0 <= x + right < self.width and 0 <= y + move_direction < self.height and self.board[pos + move_direction * self.width + right] == enemy_value:
+                    self.board[pos] = self.value['empty']
+                    self.board[pos + move_direction * self.width + right] = player_value
                 else:
                     return False
             self.board_simulate = copy.deepcopy(self.board)
@@ -65,7 +69,7 @@ class hexapawn: #흑색 진영이 먼저 시작, 상태 평가는 흑색 진영 
             for j in range(0, 3):
                 state = self.simulate(i, j, False)
                 if state:
-                    moves.append(state)
+                    moves.append({'move': [i, j], 'state' : state})
         return moves
 
     def win(self): #말 이동 후 호출할 것
@@ -92,3 +96,10 @@ class hexapawn: #흑색 진영이 먼저 시작, 상태 평가는 흑색 진영 
 
     def reset(self):
         self.__init__(self.width, self.height)
+
+if __name__ == '__main__':
+    b = hexapawn(4, 4)
+    while True:
+        i, j = map(int, input().split())
+        print(eval('b.play({0}, {1})'.format(i, j)))
+        b.display()

@@ -1,13 +1,12 @@
-from audioop import cross
 import numpy as np
 
-def crossover(a, b):
-    child = ann(a.structure)
-    for i in range(0, len(a.structure) - 1):
+def crossover(parent1, parent2):
+    child = ann(parent1.structure)
+    for i in range(0, len(parent1.structure) - 1):
         if np.random.randint(2) == 0:
-            child.weights[i] = a.weights[i].copy()
+            child.weights[i] = parent1.weights[i].copy()
         else:
-            child.weights[i] = b.weights[i].copy()
+            child.weights[i] = parent2.weights[i].copy()
     return child
 
 class ann:
@@ -25,7 +24,7 @@ class ann:
             self.weights.append(np.random.normal(loc = 0.0, scale = (4 / (self.structure[i] + self.structure[i + 1])) ** 0.5, size = (self.structure[i], self.structure[i + 1])))
     
     def prop(self, input_data, bias = 0.1):
-        input_data += bias
+        input_data = np.array(input_data) + bias
         for w in self.weights[:-1]:
             input_data = ann.sigmoid(np.dot(input_data, w))
         return np.dot(input_data, self.weights[-1])
