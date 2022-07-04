@@ -1,4 +1,4 @@
-import game, ann, random, dill
+import game, ann, random, dill, time
 
 #각 신경망이 받아들이는 보드의 값은 동일함, 보드 상태 평가는 흑색 진영을 기준으로 진행됨, 평가된 상태는 백색 진영의 경우 -1을 곱해 반전시킬 것
 #speciation이 필요한지 고려해 볼 것
@@ -62,17 +62,18 @@ class searching_space:
                 index = i
         return self.anns[index]
 
-generation = 20
+generation = 3
 population = 300
 width, height = 4, 4
 agent = searching_space(population, [width * height, 30, 30, 1])
 
 for i in range(0, generation):
+    t = time.time()
     for j in range(0, population):
         for k in range(j + 1, population):
             winner = play_game(agent.get(j), agent.get(k), width, height)
             agent.reward([j, k][winner])
-    with open('gen{0}'.format(i + 1), 'wb') as f:
+    with open('{0}by{1}hexa gen{2}'.format(width, height, i + 1), 'wb') as f:
         dill.dump(agent, f)
-    print('{0}세대 : 저장 완료'.format(i + 1))
+    print('{0}세대 : 저장 완료, {1}분({2}초) 경과'.format(i + 1, (time.time() - t) / 60, time.time() - t))
     agent.update()
