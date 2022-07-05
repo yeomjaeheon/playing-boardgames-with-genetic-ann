@@ -36,7 +36,7 @@ class searching_space:
             self.score.append(1)
 
     def update(self):
-        threshold = 100
+        threshold = 50
         for i in range(0, self.num_ann):
             parent1 = self.get_random_parent()
             parent2 = self.get_random_parent()
@@ -76,9 +76,9 @@ class searching_space:
         print(self.score[index])
         return self.anns[index]
 
-width, height = 3, 3
-generation = 100
-population = 50
+width, height = 5, 5
+generation = 10
+population = 100
 ann_structure = [width * height, 30, 1]
 
 try:
@@ -96,6 +96,7 @@ if mode == 'new':
     gene_pool = searching_space(population, ann_structure)
     savings = []
     for j in range(0, population):
+        print('.', end = '')
         for k in range(0, population):
             if j != k:
                 gene_pool.reward([j, k][play_game(gene_pool.get(j), gene_pool.get(k), width, height)])
@@ -108,7 +109,9 @@ if mode == 'new':
         gene_pool_next_generation = copy.deepcopy(savings[-1])
         gene_pool_next_generation.update()
         for j in range(0, population):
+            print('.', end = '')
             if (j + 1) % 10 == 0:
+                print('')
                 print('평가 중({0} / {1})'.format(j + 1, population))
             for k in range(0, population):
                 if j != k:
@@ -119,7 +122,9 @@ if mode == 'new':
             gene_pool_next_generation = copy.deepcopy(savings[-1])
             gene_pool_next_generation.update()
             for j in range(0, population):
+                print('.', end = '')
                 if (j + 1) % 10 == 0:
+                    print('')
                     print('평가 중({0} / {1})'.format(j + 1, population))
                 for k in range(0, population):
                     if j != k:
@@ -144,7 +149,9 @@ elif mode == 'prev':
         gene_pool_next_generation = copy.deepcopy(savings[-1])
         gene_pool_next_generation.update()
         for j in range(0, population):
+            print('.', end = '')
             if (j + 1) % 10 == 0:
+                print('')
                 print('평가 중({0} / {1})'.format(j + 1, population))
             for k in range(0, population):
                 if j != k:
@@ -155,7 +162,9 @@ elif mode == 'prev':
             gene_pool_next_generation = copy.deepcopy(savings[-1])
             gene_pool_next_generation.update()
             for j in range(0, population):
+                print('.', end = '')
                 if (j + 1) % 10 == 0:
+                    print('')
                     print('평가 중({0} / {1})'.format(j + 1, population))
                 for k in range(0, population):
                     if j != k:
