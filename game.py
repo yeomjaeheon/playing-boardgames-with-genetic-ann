@@ -96,10 +96,3 @@ class hexapawn: #흑색 진영이 먼저 시작, 상태 평가는 흑색 진영 
 
     def reset(self):
         self.__init__(self.width, self.height)
-
-if __name__ == '__main__':
-    b = hexapawn(4, 4)
-    while True:
-        i, j = map(int, input().split())
-        print(eval('b.play({0}, {1})'.format(i, j)))
-        b.display()

@@ -9,13 +9,18 @@ def crossover(parent1, parent2):
             child.weights[i] = parent2.weights[i].copy()
     return child
 
+def distance(parent1, parent2):
+    delta = 0
+    for i in range(0, len(parent1.structure) - 1):
+        delta += np.sum((parent1.weights[i] - parent2.weights[i]) ** 2)
+    return delta
+
 class ann:
     def sigmoid(x):
         return 1 / (1 + np.exp(-x))
 
-    def softmax_simp(x):
-        exp_x = np.exp(x)
-        return exp_x
+    def relu(x):
+        return np.maximum(0, x)
 
     def __init__(self, structure):
         self.structure = structure
@@ -24,12 +29,12 @@ class ann:
             self.weights.append(np.random.normal(loc = 0.0, scale = (4 / (self.structure[i] + self.structure[i + 1])) ** 0.5, size = (self.structure[i], self.structure[i + 1])))
     
     def prop(self, input_data, bias = 0.1):
-        input_data = np.array(input_data) + bias
+        input_data = np.array(input_data)
         for w in self.weights[:-1]:
-            input_data = ann.sigmoid(np.dot(input_data, w))
+            input_data = ann.relu(np.dot(input_data + bias, w))
         return np.dot(input_data, self.weights[-1])
 
-    def mut(self, mut_rate = 0.03, mut_scale = 0.01):
+    def mut(self, mut_rate = 0.01, mut_scale = 0.01):
         for i in range(0, len(self.weights)):
             if np.random.random() <= mut_rate:
                 self.weights[i] += np.random.normal(loc = 0.0, scale = mut_scale, size = (self.structure[i], self.structure[i + 1]))
