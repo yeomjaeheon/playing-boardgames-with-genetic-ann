@@ -62,16 +62,16 @@ class searching_space:
             if tmp < self.score[i]:
                 tmp = self.score[i]
                 index = i
+        print(self.score[index])
         return self.anns[index]
 
 savings = []
-generation = 50
-population = 200
-width, height = 5, 5
-agent = searching_space(population, [width * height, 10, 20, 10, 1])
+generation = 300
+population = 50
+width, height = 3, 3
+agent = searching_space(population, [width * height, 30, 1])
 savings.append(copy.deepcopy(agent))
 time_takes = 0
-
 try:
     with open('ints', 'rb') as f:
         intermediate_storage = dill.load(f)
@@ -93,13 +93,14 @@ except:
 if mode == 'new':
     for i in range(0, generation):
         t = time.time()
+        if i > 0:
+            agent.update()
         for j in range(0, population):
             if (j + 1) % 10 == 0:
                 print('{0}세대 : {1}/{2} 완료'.format(i + 1, j + 1, population))
             for k in range(0, population):
                 winner = play_game(agent.get(j), agent.get(k), width, height)
                 agent.reward([j, k][winner])
-        agent.update()
         savings.append(copy.deepcopy(agent))
         with open('ints', 'wb') as f:
             dill.dump(savings, f)
@@ -109,15 +110,16 @@ if mode == 'new':
         dill.dump(savings, f)
 
 elif mode == 'prev':
+    agent = copy.deepcopy(intermediate_storage[-1])
     for i in range(len(intermediate_storage) - 1, generation):
         t = time.time()
+        agent.update()
         for j in range(0, population):
             if (j + 1) % 10 == 0:
                 print('{0}세대 : {1}/{2} 완료'.format(i + 1, j + 1, population))
             for k in range(0, population):
                 winner = play_game(agent.get(j), agent.get(k), width, height)
                 agent.reward([j, k][winner])
-        agent.update()
         intermediate_storage.append(copy.deepcopy(agent))
         with open('ints', 'wb') as f:
             dill.dump(intermediate_storage, f)

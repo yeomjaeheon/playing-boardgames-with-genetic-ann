@@ -12,6 +12,10 @@ color = input()
 with open(file_name, 'rb') as f:
     agents = dill.load(f)
 
+print(len(agents))
+
+#print(agents[-1].score)
+
 mode = 'random'
 
 if mode == 'random':
