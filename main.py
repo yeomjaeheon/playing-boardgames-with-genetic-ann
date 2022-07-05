@@ -36,7 +36,7 @@ class searching_space:
             self.score.append(1)
 
     def update(self):
-        threshold = 50
+        threshold = 100
         for i in range(0, self.num_ann):
             parent1 = self.get_random_parent()
             parent2 = self.get_random_parent()
@@ -77,8 +77,8 @@ class searching_space:
         return self.anns[index]
 
 width, height = 5, 5
-generation = 10
-population = 100
+generation = 5
+population = 50
 ann_structure = [width * height, 30, 1]
 
 try:
@@ -97,6 +97,9 @@ if mode == 'new':
     savings = []
     for j in range(0, population):
         print('.', end = '')
+        if (j + 1) % 10 == 0:
+            print('')
+            print('평가 중({0} / {1})'.format(j + 1, population))
         for k in range(0, population):
             if j != k:
                 gene_pool.reward([j, k][play_game(gene_pool.get(j), gene_pool.get(k), width, height)])
