@@ -16,7 +16,7 @@ print(len(agents))
 
 #print(agents[-1].score)
 
-mode = 'random'
+mode = 'best'
 
 if mode == 'random':
     player = agents[-1].get(random.randint(0, agents[-1].num_ann - 1))

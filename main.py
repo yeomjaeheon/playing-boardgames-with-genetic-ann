@@ -36,7 +36,7 @@ class searching_space:
             self.score.append(1)
 
     def update(self):
-        threshold = 100
+        threshold = 100000
         for i in range(0, self.num_ann):
             parent1 = self.get_random_parent()
             parent2 = self.get_random_parent()
@@ -76,10 +76,10 @@ class searching_space:
         print(self.score[index])
         return self.anns[index]
 
-width, height = 5, 5
-generation = 5
-population = 50
-ann_structure = [width * height, 30, 1]
+width, height = 4, 4
+generation = 100
+population = 300
+ann_structure = [width * height, 50, 1]
 
 try:
     with open('intsto', 'rb') as f:

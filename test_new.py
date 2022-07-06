@@ -16,7 +16,7 @@ print(len(agents))
 
 print(agents['gene_pool'][-1].score)
 
-mode = 'best'
+mode = 'random'
 
 if mode == 'random':
     player = agents['gene_pool'][-1].get(random.randint(0, agents['gene_pool'][-1].num_ann - 1))
