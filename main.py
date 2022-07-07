@@ -1,3 +1,4 @@
+from os import uname
 import game, ann, random, dill, time, copy
 
 #각 신경망이 다른 모든 신경망과 두 가지 진영 이상으로 경기를 하도록 수정할 것, n**2으로
@@ -27,7 +28,6 @@ def play_game(player1, player2, width, height):
 
 class searching_space:
     def __init__(self, num_ann, structure):
-        self.delay_counter = 0
         self.num_ann, self.structure = num_ann, structure
         self.anns = []
         self.score = []
@@ -36,23 +36,15 @@ class searching_space:
             self.score.append(1)
 
     def update(self):
-        threshold = 100000
         for i in range(0, self.num_ann):
             parent1 = self.get_random_parent()
             parent2 = self.get_random_parent()
-            while ann.distance(parent1, parent2) > threshold:
-                parent1 = self.get_random_parent()
-                parent2 = self.get_random_parent()
             self.anns.append(ann.crossover(parent1, parent2))
             self.anns[-1].mut()
         del self.anns[:self.num_ann]
         self.score = [1 for i in range(0, self.num_ann)]
-        if self.delay_counter > 2 * self.num_ann:
-            print('지연 중({0}%), threshold를 높일 것'.format(self.delay_counter / (2 * self.num_ann) * 100))
-        self.delay_counter = 0
 
     def get_random_parent(self):
-        self.delay_counter += 1
         n = random.randint(0, sum(self.score))
         s = 0
         for i in range(0, self.num_ann):
@@ -76,113 +68,36 @@ class searching_space:
         print(self.score[index])
         return self.anns[index]
 
-width, height = 4, 4
+width, height = 5, 5
 generation = 100
-population = 300
+population = 1000
+num_evaluation_unit = 10
 ann_structure = [width * height, 50, 1]
 
+#이전에 저장된 과정을 이어서 진행
+default_name_intermediat_storage = 'intsto' #중간 저장 파일 기본 이름
+
 try:
-    with open('intsto', 'rb') as f:
-        backup = dill.load(f)
-    
-    if backup['gene_pool'][-1].structure == ann_structure and len(backup['gene_pool']) < generation:
-        mode = 'prev'
-    else:
-        mode = 'new'
+    with open(default_name_intermediat_storage, 'rb') as f:
+        save_file = dill.load(f)
+    using_previous_file = True
 except:
-    mode = 'new'
+    using_previous_file = False
+    save_file = searching_space(population, ann_structure)
 
-if mode == 'new':
-    gene_pool = searching_space(population, ann_structure)
-    savings = []
+if using_previous_file:
+    pass
+
+else:
+    gen_zero = searching_space(population, ann_structure)
+    evaluation_unit = [gen_zero.get_random_parent() for i in range(0, num_evaluation_unit - 1)] + [gen_zero.get_best_player()]
+    evaluation_unit_lose = [False for i in range(num_evaluation_unit)]
+
     for j in range(0, population):
-        print('.', end = '')
-        if (j + 1) % 10 == 0:
-            print('')
-            print('평가 중({0} / {1})'.format(j + 1, population))
-        for k in range(0, population):
-            if j != k:
-                gene_pool.reward([j, k][play_game(gene_pool.get(j), gene_pool.get(k), width, height)])
-    savings.append(copy.deepcopy(gene_pool))
+        for k in range(0, num_evaluation_unit):
+            if play_game(save_file.get(j), evaluation_unit[k]) == 0:
+                save_file.reward(j)
+                evaluation_unit_lose[k] = True
 
-    for i in range(0, generation):
-        sum_time = 0
-        t = time.time()
-
-        gene_pool_next_generation = copy.deepcopy(savings[-1])
-        gene_pool_next_generation.update()
-        for j in range(0, population):
-            print('.', end = '')
-            if (j + 1) % 10 == 0:
-                print('')
-                print('평가 중({0} / {1})'.format(j + 1, population))
-            for k in range(0, population):
-                if j != k:
-                    gene_pool_next_generation.reward([j, k][play_game(gene_pool_next_generation.get(j), gene_pool_next_generation.get(k), width, height)])
-        
-        while play_game(gene_pool_next_generation.get_best_player(), savings[-1].get_best_player(), width, height) != 0:
-            print('삭제하고 새로운 세대 생성중')
-            gene_pool_next_generation = copy.deepcopy(savings[-1])
-            gene_pool_next_generation.update()
-            for j in range(0, population):
-                print('.', end = '')
-                if (j + 1) % 10 == 0:
-                    print('')
-                    print('평가 중({0} / {1})'.format(j + 1, population))
-                for k in range(0, population):
-                    if j != k:
-                        gene_pool_next_generation.reward([j, k][play_game(gene_pool_next_generation.get(j), gene_pool_next_generation.get(k), width, height)])
-        
-        savings.append(copy.deepcopy(gene_pool_next_generation))
-
-        now = time.time()
-        sum_time += (now - t)
-        with open('intsto', 'wb') as f:
-            dill.dump({'gene_pool' : savings, 'sum_time' : sum_time}, f)
-
-        print('{0}세대 : 중간 저장 완료, 소요 시간 : {1}분, 남은 시간(예상) : {2}분'.format(i + 1, (now - t) / 60, sum_time / (i + 1) * (generation - (i + 1)) / 60))
-
-elif mode == 'prev':
-    print('중간 저장 파일을 이어서 진행')
-    sum_time = backup['sum_time']
-    savings = backup['gene_pool']
-    for i in range(len(savings) - 1, generation):
-        t = time.time()
-
-        gene_pool_next_generation = copy.deepcopy(savings[-1])
-        gene_pool_next_generation.update()
-        for j in range(0, population):
-            print('.', end = '')
-            if (j + 1) % 10 == 0:
-                print('')
-                print('평가 중({0} / {1})'.format(j + 1, population))
-            for k in range(0, population):
-                if j != k:
-                    gene_pool_next_generation.reward([j, k][play_game(gene_pool_next_generation.get(j), gene_pool_next_generation.get(k), width, height)])
-        
-        while play_game(gene_pool_next_generation.get_best_player(), savings[-1].get_best_player(), width, height) != 0:
-            print('삭제하고 다시 새로운 세대 생성중')
-            gene_pool_next_generation = copy.deepcopy(savings[-1])
-            gene_pool_next_generation.update()
-            for j in range(0, population):
-                print('.', end = '')
-                if (j + 1) % 10 == 0:
-                    print('')
-                    print('평가 중({0} / {1})'.format(j + 1, population))
-                for k in range(0, population):
-                    if j != k:
-                        gene_pool_next_generation.reward([j, k][play_game(gene_pool_next_generation.get(j), gene_pool_next_generation.get(k), width, height)])
-        
-        savings.append(copy.deepcopy(gene_pool_next_generation))
-
-        now = time.time()
-        sum_time += (now - t)
-        with open('intsto', 'wb') as f:
-            dill.dump({'gene_pool' : savings, 'sum_time' : sum_time}, f)
-
-        print('{0}세대 : 중간 저장 완료, 소요 시간 : {1}분, 남은 시간(예상) : {2}분'.format(i + 1, (now - t) / 60, sum_time / (i + 1) * (generation - (i + 1)) / 60))
-
-with open('gen{0}_{1}_{2}'.format(generation, width, height), 'wb') as f:
-    dill.dump({'gene_pool' : savings, 'sum_time' : sum_time}, f)
-
-print('{0}세대 : 최종 저장 완료, 소요 시간 : {1}분, 남은 시간(예상) : {2}분'.format(i + 1, (now - t) / 60, (sum_time / (i + 1)) * (generation - (i + 1)) / 60))
+    save_file.update()
+    
