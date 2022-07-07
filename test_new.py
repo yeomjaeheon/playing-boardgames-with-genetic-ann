@@ -16,7 +16,7 @@ print(len(agents))
 
 print(agents['gene_pool'][-1].score)
 
-mode = 'random'
+mode = 'best'
 
 if mode == 'random':
     player = agents['gene_pool'][-1].get(random.randint(0, agents['gene_pool'][-1].num_ann - 1))
@@ -79,3 +79,5 @@ while True:
             break
         board.display()
         print('')
+
+input()
