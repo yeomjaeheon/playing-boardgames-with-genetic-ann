@@ -22,7 +22,7 @@ def play_game(player1, player2, width, height):
                 if random.random() <= 0.5:
                     state_index = i
         if board.play(*moves[state_index]['move']):
-            return board.game_counter % 2
+            return board.game_counter
         #board.display()
         #print(*moves[state_index]['move'])
 
@@ -45,7 +45,7 @@ class searching_space:
         self.score = [1 for i in range(0, self.num_ann)]
 
     def get_random_parent(self):
-        n = random.randint(0, sum(self.score))
+        n = random.uniform(0, sum(self.score))
         s = 0
         for i in range(0, self.num_ann):
             s += self.score[i]
@@ -55,8 +55,8 @@ class searching_space:
     def get(self, index):
         return self.anns[index]
 
-    def reward(self, index):
-        self.score[index] += 1
+    def reward(self, index, v):
+        self.score[index] += v
 
     def get_best_player(self):
         index = 0
@@ -65,28 +65,58 @@ class searching_space:
             if tmp < self.score[i]:
                 tmp = self.score[i]
                 index = i
-        print(self.score[index])
         return self.anns[index]
 
-width, height = 5, 5
+width, height = 3, 3
 generation = 30
-population = 500
+population = 1000
 num_evaluation_unit = 5
-ann_structure = [width * height * 2, 50, 1]
+ann_structure = [width * height * 2, 30, 30, 1]
+standard_score = 10000
+evaluation_function = (lambda x : x ** 2)
+threshold = 0.3
 
 #이전에 저장된 과정을 이어서 진행
 default_name_intermediat_storage = 'intsto' #중간 저장 파일 기본 이름
 
 try:
     with open(default_name_intermediat_storage, 'rb') as f:
-        save_file = dill.load(f)
+        file = dill.load(f)
+        save_file = file['data']
     using_previous_file = True
 except:
     using_previous_file = False
     save_file = searching_space(population, ann_structure)
 
 if using_previous_file:
-    pass
+    if file['gen'] < generation:
+        for i in range(file['gen'] + 1, generation):
+            print('{0}세대 : 진행중'.format(i + 1))
+            best_player_prev = save_file.get_best_player()
+            win_count = 0
+            while win_count < population * 2 * threshold:
+                print('*', end = '')
+                win_count = 0
+                save_file_tmp = copy.deepcopy(save_file)
+                save_file_tmp.update()
+                for j in range(0, population):
+                    res = play_game(save_file_tmp.get(j), best_player_prev, width, height)
+                    if res % 2 == 0:
+                        win_count += 1
+                        save_file_tmp.reward(j, standard_score / evaluation_function(res))
+                    res = play_game(best_player_prev, save_file_tmp.get(j), width, height)
+                    if res % 2 == 1:
+                        win_count += 1
+                        save_file_tmp.reward(j, standard_score / evaluation_function(res))
+
+            print('')
+
+            save_file = copy.deepcopy(save_file_tmp)
+            with open(default_name_intermediat_storage, 'wb') as f:
+                dill.dump({'data' : save_file, 'gen' : i}, f)
+            print('{0}세대 : 중간 저장 완료'.format(i + 1))
+    else:
+        print('완료됨')
 
 else:
     gen_alpha = searching_space(population, ann_structure)
@@ -96,33 +126,43 @@ else:
     for j in range(0, population):
         if (j + 1) % 100 == 0:
             print('.', end = '')
-        if play_game(save_file.get(j), best_player_prev, width, height) == 0:
-            save_file.reward(j)
+        res = play_game(save_file.get(j), best_player_prev, width, height)
+        if res % 2 == 0:
             win_count += 1
-        if play_game(best_player_prev, save_file.get(j), width, height) == 0:
-            save_file.reward(j)
+            save_file.reward(j, standard_score / evaluation_function(res))
+        res = play_game(best_player_prev, save_file.get(j), width, height)
+        if res % 2 == 1:
             win_count += 1
+            save_file.reward(j, standard_score / evaluation_function(res))
+
+    print('')
 
     for i in range(0, generation):
         print('{0}세대 : 진행중'.format(i + 1))
         best_player_prev = save_file.get_best_player()
         win_count = 0
-        while win_count < population:
+        while win_count < population * 2 * threshold:
+            print('*', end = '')
+            win_count = 0
             save_file_tmp = copy.deepcopy(save_file)
             save_file_tmp.update()
             for j in range(0, population):
-                if play_game(save_file_tmp.get(j), best_player_prev, width, height) == 0:
-                    save_file_tmp.reward(j)
+                res = play_game(save_file_tmp.get(j), best_player_prev, width, height)
+                if res % 2 == 0:
                     win_count += 1
-                if play_game(best_player_prev, save_file_tmp.get(j), width, height) == 0:
-                    save_file_tmp.reward(j)
+                    save_file_tmp.reward(j, standard_score / evaluation_function(res))
+                res = play_game(best_player_prev, save_file_tmp.get(j), width, height)
+                if res % 2 == 1:
                     win_count += 1
+                    save_file_tmp.reward(j, standard_score / evaluation_function(res))
+
+        print('')
 
         save_file = copy.deepcopy(save_file_tmp)
         with open(default_name_intermediat_storage, 'wb') as f:
-            dill.dump(save_file, f)
+            dill.dump({'data' : save_file, 'gen' : i}, f)
         print('{0}세대 : 중간 저장 완료'.format(i + 1))
 
-with open('gen{0}_{1}_{2}'.format(generation, width, height), 'wb') as f:
-        dill.dump(save_file, f)
+with open('gen{0}_{1}_{2}_{3}'.format(generation, population, width, height), 'wb') as f:
+        dill.dump({'data' : save_file, 'gen' : i}, f)
         print('저장 완료')

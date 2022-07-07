@@ -31,10 +31,11 @@ class ann:
     def prop(self, input_data, bias = 0.1):
         input_data = np.array(input_data)
         for w in self.weights[:-1]:
-            input_data = ann.relu(np.dot(input_data + bias, w))
+            input_data = ann.sigmoid(np.dot(input_data + bias, w))
         return np.dot(input_data, self.weights[-1])
 
-    def mut(self, mut_rate = 0.01, mut_scale = 0.01):
+    def mut(self, mut_rate = 0.1, mut_scale = 0.05):
         for i in range(0, len(self.weights)):
             if np.random.random() <= mut_rate:
+                #print('돌연변이 발생')
                 self.weights[i] += np.random.normal(loc = 0.0, scale = mut_scale, size = (self.structure[i], self.structure[i + 1]))

@@ -10,7 +10,7 @@ print('color : ', end = '')
 color = input()
 
 with open(file_name, 'rb') as f:
-    agents = dill.load(f)
+    agents = dill.load(f)['data']
 
 print(agents.score)
 
@@ -56,7 +56,7 @@ while True:
         tmp = -10 ** 10
         state_index = 0
         for i, m in enumerate(moves):
-            g = player.prop(m['state'])[0] * 1
+            g = player.prop(board.board + m['state'])[0] * 1
             if tmp < g:
                 state_index = i
                 tmp = g
