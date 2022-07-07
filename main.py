@@ -39,7 +39,7 @@ class searching_space:
         for i in range(0, self.num_ann):
             parent1 = self.get_random_parent()
             parent2 = self.get_random_parent()
-            self.anns.append(ann.crossover(parent1, parent2))
+            self.anns.append(ann.crossover(parent1, parent2, 0.8))
             self.anns[-1].mut()
         del self.anns[:self.num_ann]
         self.score = [1 for i in range(0, self.num_ann)]
@@ -67,14 +67,14 @@ class searching_space:
                 index = i
         return self.anns[index]
 
-width, height = 3, 3
-generation = 30
-population = 1000
+width, height = 5, 5
+generation = 100
+population = 100
 num_evaluation_unit = 5
-ann_structure = [width * height * 2, 30, 30, 1]
+ann_structure = [width * height * 2, 100, 30, 1]
 standard_score = 10000
-evaluation_function = (lambda x : x ** 2)
-threshold = 0.3
+evaluation_function = (lambda x : x)
+threshold = 0.1
 
 #이전에 저장된 과정을 이어서 진행
 default_name_intermediat_storage = 'intsto' #중간 저장 파일 기본 이름
@@ -155,6 +155,8 @@ else:
                 if res % 2 == 1:
                     win_count += 1
                     save_file_tmp.reward(j, standard_score / evaluation_function(res))
+            
+        print(save_file_tmp.score)
 
         print('')
 

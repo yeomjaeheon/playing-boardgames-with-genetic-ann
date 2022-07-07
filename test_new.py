@@ -17,7 +17,7 @@ print(agents.score)
 mode = 'best'
 
 if mode == 'random':
-    player = agents.get(random.randint(0, agents['gene_pool'][-1].num_ann - 1))
+    player = agents.get(random.randint(0, agents.num_ann - 1))
 elif mode == 'best':
     player = agents.get_best_player()
 

@@ -1,9 +1,9 @@
 import numpy as np
 
-def crossover(parent1, parent2):
+def crossover(parent1, parent2, p): #가능하면 한 쪽의 유전정보만을 가져옴
     child = ann(parent1.structure)
     for i in range(0, len(parent1.structure) - 1):
-        if np.random.randint(2) == 0:
+        if np.random.random() <= p:
             child.weights[i] = parent1.weights[i].copy()
         else:
             child.weights[i] = parent2.weights[i].copy()
@@ -34,7 +34,7 @@ class ann:
             input_data = ann.sigmoid(np.dot(input_data + bias, w))
         return np.dot(input_data, self.weights[-1])
 
-    def mut(self, mut_rate = 0.1, mut_scale = 0.05):
+    def mut(self, mut_rate = 0.01, mut_scale = 0.01):
         for i in range(0, len(self.weights)):
             if np.random.random() <= mut_rate:
                 #print('돌연변이 발생')
