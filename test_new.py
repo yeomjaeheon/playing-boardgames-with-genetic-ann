@@ -12,16 +12,14 @@ color = input()
 with open(file_name, 'rb') as f:
     agents = dill.load(f)
 
-print(len(agents))
-
-print(agents['gene_pool'][-1].score)
+print(agents.score)
 
 mode = 'best'
 
 if mode == 'random':
-    player = agents['gene_pool'][-1].get(random.randint(0, agents['gene_pool'][-1].num_ann - 1))
+    player = agents.get(random.randint(0, agents['gene_pool'][-1].num_ann - 1))
 elif mode == 'best':
-    player = agents['gene_pool'][-1].get_best_player()
+    player = agents.get_best_player()
 
 board = game.hexapawn(width, height)
 
@@ -38,7 +36,7 @@ while True:
         tmp = -10 ** 10
         state_index = 0
         for i, m in enumerate(moves):
-            g = player.prop(m['state'])[0] * -1 #백색 진영의 경우는 상태 평가를 -1를 곱해 반전
+            g = player.prop(board.board + m['state'])[0] * -1 #백색 진영의 경우는 상태 평가를 -1를 곱해 반전
             if tmp < g:
                 state_index = i
                 tmp = g

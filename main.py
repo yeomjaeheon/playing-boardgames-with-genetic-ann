@@ -1,4 +1,4 @@
-from os import uname
+from numpy import save
 import game, ann, random, dill, time, copy
 
 #각 신경망이 다른 모든 신경망과 두 가지 진영 이상으로 경기를 하도록 수정할 것, n**2으로
@@ -14,7 +14,7 @@ def play_game(player1, player2, width, height):
         tmp = -10 ** 10
         state_index = 0
         for i, m in enumerate(moves):
-            g = players[board.game_counter % 2].prop(m['state'])[0] * [1, -1][board.game_counter % 2] #백색 진영의 경우는 상태 평가를 -1를 곱해 반전
+            g = players[board.game_counter % 2].prop(board.board + m['state'])[0] * [1, -1][board.game_counter % 2] #백색 진영의 경우는 상태 평가를 -1를 곱해 반전
             if tmp < g:
                 state_index = i
                 tmp = g
@@ -69,10 +69,10 @@ class searching_space:
         return self.anns[index]
 
 width, height = 5, 5
-generation = 100
-population = 1000
-num_evaluation_unit = 10
-ann_structure = [width * height, 50, 1]
+generation = 30
+population = 500
+num_evaluation_unit = 5
+ann_structure = [width * height * 2, 50, 1]
 
 #이전에 저장된 과정을 이어서 진행
 default_name_intermediat_storage = 'intsto' #중간 저장 파일 기본 이름
@@ -89,15 +89,40 @@ if using_previous_file:
     pass
 
 else:
-    gen_zero = searching_space(population, ann_structure)
-    evaluation_unit = [gen_zero.get_random_parent() for i in range(0, num_evaluation_unit - 1)] + [gen_zero.get_best_player()]
-    evaluation_unit_lose = [False for i in range(num_evaluation_unit)]
+    gen_alpha = searching_space(population, ann_structure)
+    best_player_prev = gen_alpha.get_best_player()
+    win_count = 0
 
     for j in range(0, population):
-        for k in range(0, num_evaluation_unit):
-            if play_game(save_file.get(j), evaluation_unit[k]) == 0:
-                save_file.reward(j)
-                evaluation_unit_lose[k] = True
+        if (j + 1) % 100 == 0:
+            print('.', end = '')
+        if play_game(save_file.get(j), best_player_prev, width, height) == 0:
+            save_file.reward(j)
+            win_count += 1
+        if play_game(best_player_prev, save_file.get(j), width, height) == 0:
+            save_file.reward(j)
+            win_count += 1
 
-    save_file.update()
-    
+    for i in range(0, generation):
+        print('{0}세대 : 진행중'.format(i + 1))
+        best_player_prev = save_file.get_best_player()
+        win_count = 0
+        while win_count < population:
+            save_file_tmp = copy.deepcopy(save_file)
+            save_file_tmp.update()
+            for j in range(0, population):
+                if play_game(save_file_tmp.get(j), best_player_prev, width, height) == 0:
+                    save_file_tmp.reward(j)
+                    win_count += 1
+                if play_game(best_player_prev, save_file_tmp.get(j), width, height) == 0:
+                    save_file_tmp.reward(j)
+                    win_count += 1
+
+        save_file = copy.deepcopy(save_file_tmp)
+        with open(default_name_intermediat_storage, 'wb') as f:
+            dill.dump(save_file, f)
+        print('{0}세대 : 중간 저장 완료'.format(i + 1))
+
+with open('gen{0}_{1}_{2}'.format(generation, width, height), 'wb') as f:
+        dill.dump(save_file, f)
+        print('저장 완료')
