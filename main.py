@@ -72,12 +72,12 @@ class searching_space:
                 index = i
         return self.anns[index]
 
-width, height = 5, 5
+width, height = 3, 3 #5, 5
 generation = 500
-population = 100
-num_evaluation_unit = 2
-ann_structure = [width * height * 2, 60, 1]
-standard_score = 10000
+population = 100 #100 
+num_evaluation_unit = 1 #2
+ann_structure = [width * height * 2, 10, 1]
+standard_score = 100 #10000
 evaluation_function = (lambda x : 0.5 * x ** 2)
 threshold = 1
 
