@@ -1,5 +1,11 @@
 import game, dill, random
 
+def convert(map, game_counter):
+    if game_counter % 2 == 0:
+        return map
+    else:
+        return [-map[i] for i in range(len(map) - 1, -1, -1)]
+
 print('file name : ', end = '')
 file_name = input()
 
@@ -17,7 +23,7 @@ print(agents.score)
 mode = 'best'
 
 if mode == 'random':
-    player = agents.get(random.randint(0, agents.num_ann - 1))
+    player = agents.get_random_parent()
 elif mode == 'best':
     player = agents.get_best_player()
 
@@ -36,7 +42,7 @@ while True:
         tmp = -10 ** 10
         state_index = 0
         for i, m in enumerate(moves):
-            g = player.prop(board.board + m['state'])[0] * -1 #백색 진영의 경우는 상태 평가를 -1를 곱해 반전
+            g = player.prop(convert(board.board, board.game_counter) + convert(m['state'], board.game_counter))[0]
             if tmp < g:
                 state_index = i
                 tmp = g
@@ -56,7 +62,7 @@ while True:
         tmp = -10 ** 10
         state_index = 0
         for i, m in enumerate(moves):
-            g = player.prop(board.board + m['state'])[0] * 1
+            g = player.prop(convert(board.board, board.game_counter) + convert(m['state'], board.game_counter))[0]
             if tmp < g:
                 state_index = i
                 tmp = g
