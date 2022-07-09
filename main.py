@@ -72,12 +72,12 @@ class searching_space:
                 index = i
         return self.anns[index]
 
-width, height = 3, 3 #5, 5
-generation = 500
-population = 100 #100 
-num_evaluation_unit = 1 #2
-ann_structure = [width * height * 2, 10, 1]
-standard_score = 100 #10000
+width, height = 5, 5
+generation = 800
+population = 150
+num_evaluation_unit = 3
+ann_structure = [width * height * 2, 100, 100, 1]
+standard_score = 10000
 evaluation_function = (lambda x : 0.5 * x ** 2)
 threshold = 1
 
@@ -172,6 +172,10 @@ else:
         with open(default_name_intermediat_storage, 'wb') as f:
             dill.dump({'data' : save_file, 'gen' : i}, f)
         print('{0}세대 : 중간 저장 완료'.format(i + 1))
+
+        if (i + 1) % 100 == 0:
+            with open('gen{0}_{1}_{2}_{3}'.format(i + 1, population, width, height), 'wb') as f:
+                dill.dump({'data' : save_file, 'gen' : i}, f)
 
 with open('gen{0}_{1}_{2}_{3}'.format(generation, population, width, height), 'wb') as f:
         dill.dump({'data' : save_file, 'gen' : i}, f)
